@@ -1,0 +1,12 @@
+[theme]
+base = "light"
+
+[server]
+headless = true
+maxUploadSize = 20  # PDF 업로드는 파일당 20MB까지
+
+[client]
+showErrorDetails = "none"  # 오류 상세(스택트레이스)는 브라우저에 보이지 않고 서버 로그에만 남김
+
+[browser]
+gatherUsageStats = false
