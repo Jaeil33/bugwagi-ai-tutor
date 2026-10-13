@@ -289,6 +289,8 @@ class Turn:
     started: float
     rewrite_input_tokens: int = 0
     rewrite_output_tokens: int = 0
+    rewrite_seconds: float = 0.0  # 단계별 소요 시간: 느릴 때 어디가 원인인지 보려고 기록
+    search_seconds: float = 0.0
     answer: str = ""
     input_tokens: int = 0
     output_tokens: int = 0
@@ -365,6 +367,8 @@ class Turn:
             "input_tokens": self.input_tokens,
             "output_tokens": self.output_tokens,
             "cost": self.cost,
+            "rewrite_seconds": self.rewrite_seconds,
+            "search_seconds": self.search_seconds,
         }
 
 
@@ -422,11 +426,14 @@ class RAGPipeline:
             history.pop(0)
 
         search_query, rw_in, rw_out = rewrite_query(question, history, model_id)
+        rewritten_at = time.time()
         docs = self.retrieve(search_query, k=k, search_mode=search_mode)
+        searched_at = time.time()
         system, messages = build_prompt(docs, question, prompt_version, user_type, history)
         return Turn(question=question, search_query=search_query, docs=docs, system=system, messages=messages,
                     model_id=model_id, user_type=user_type, started=started,
-                    rewrite_input_tokens=rw_in, rewrite_output_tokens=rw_out)
+                    rewrite_input_tokens=rw_in, rewrite_output_tokens=rw_out,
+                    rewrite_seconds=rewritten_at - started, search_seconds=searched_at - rewritten_at)
 
     def ask(self, question, history=(), **kwargs):
         """스트리밍 없이 한 번에 답을 받음 (실험 스크립트용)"""

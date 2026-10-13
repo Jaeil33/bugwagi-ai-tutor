@@ -128,7 +128,8 @@ def show_meta(msg):
     st.caption(f"{badge} {meta['seconds']:.1f}초{first} · 목표 {TARGET_SECONDS}초 이내 · {meta['model']} · "
                f"{meta['user_type']} · {meta['search']} 검색 · 프롬프트 {meta['prompt']} · k={meta['k']} · {usage}")
     if meta["search_query"] != meta["question"]:
-        st.caption(f"🔁 이전 대화를 반영한 검색어: {meta['search_query']}")
+        st.caption(f"🔁 이전 대화를 반영한 검색어: {meta['search_query']} "
+                   f"(검색어 재작성 {meta.get('rewrite_seconds', 0):.1f}초 · 검색 {meta.get('search_seconds', 0):.1f}초)")
     with st.expander(f"🔎 참고한 자료 {len(meta['sources'])}개"):
         for i, s in enumerate(meta["sources"], start=1):
             st.markdown(f"**[{i}] {s['source']} · p.{s['page']}**")
@@ -324,6 +325,7 @@ if rag is not None and question:
                     "user_type": user_type, "prompt": prompt_version, "search": search_mode, "k": k,
                     "sources": turn.sources, "input_tokens": turn.input_tokens, "output_tokens": turn.output_tokens,
                     "prompt_chars": turn.prompt_chars, "cost": turn.cost,
+                    "rewrite_seconds": turn.rewrite_seconds, "search_seconds": turn.search_seconds,
                 },
             }
             show_meta(msg)
@@ -340,6 +342,7 @@ if rag is not None and question:
         search=search_mode, k=k, prompt=prompt_version, user_type=user_type,
         q_chars=len(question), followup=bool(history), rewritten=turn.search_query != question,
         pages=[d.metadata["page_no"] for d in turn.docs], seconds=round(turn.seconds, 2),
+        rewrite_s=round(turn.rewrite_seconds, 2), search_s=round(turn.search_seconds, 2),
         first_token=turn.first_token_seconds and round(turn.first_token_seconds, 2),
         input_tokens=turn.input_tokens, output_tokens=turn.output_tokens, cost=round(turn.cost, 6),
         status=status_text, request_id=turn.request_id, error=type(error).__name__ if error else None,
