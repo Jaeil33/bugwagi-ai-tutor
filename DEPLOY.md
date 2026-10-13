@@ -129,4 +129,16 @@ gcloud run deploy bugwagi-ai-tutor --source . --region asia-northeast3 --memory 
 | (배포 전 확인) 패키지 설치 실패 | `uv`가 `--extra-index-url`의 PyTorch 인덱스에서만 `requests`를 찾음 | `--find-links`로 torch만 PyTorch에서 받기 |
 | Secrets에 키를 넣었는데 오프라인 모드로 시작 | 앱 시작 시점에 `os.environ`에 키가 없었음 | 시작할 때 `st.secrets`를 환경변수로 직접 옮기고, 읽은 개수 · 키 존재 여부만 로그에 기록 |
 | 로그가 오류로 가득 참 | Streamlit 코드 변경 감시가 transformers 모듈을 전부 훑음 | `fileWatcherType = "none"` |
-| Secrets 입력 시 `.env`의 다음 줄까지 따옴표 안에 붙여 넣음 | TOML 문자열은 한 줄이어야 함 | 따옴표를 키 끝에 닫기. `.env`와 TOML은 형식이 다름(TOML은 값에 따옴표 필요) |
+| Secrets 입력 시 `.env`의 다음 줄까지 따옴표 안에 붙여 넣음 → 키를 못 읽음 | TOML 문자열은 한 줄이어야 하는데, 고친 뒤 **Save 없이 Deploy**해서 깨진 내용이 저장됨 | App settings → Secrets에서 다시 고치고 **Save changes** → Reboot. `.env`와 TOML은 형식이 다름(TOML은 값에 따옴표 필요) |
+| 첫 배포 직후 후속 질문 2건이 6~10초 (첫 글자 6~9초) | 특정하지 못함. 같은 질문을 다시 물었을 때는 2.9초 | 단계별 시간(검색어 재작성 · 검색)을 화면과 로그(`rewrite_s`, `search_s`)에 남기도록 추가. 재측정: 재작성 0.8~0.9초 · 검색 0.1초 |
+
+### 배포 후 확인 (2026-10-13, Claude Sonnet 5.5)
+
+| 질문 | 결과 | 응답 시간 |
+|---|---|---|
+| 사업 기간은 언제까지야? (예시 버튼) | 정답 "계약체결일 ∼ 2024년 12월 31일" (p.2) | 2.4초 (첫 글자 1.2초) |
+| 그럼 예산은 얼마야? (후속) | 검색어를 "이 사업의 총 예산은 얼마인가요?"로 바꿔 정답 103,792,000원 (p.2) | 2.9초 (첫 글자 1.8초) |
+| 그 금액에 부가세도 포함된 거야? (후속) | 검색어 "사업 예산 103,792,000원에 부가세가 포함되어 있나요?" → 포함 | 2.9초 (첫 글자 1.8초) |
+
+- 질문당 비용 $0.006~0.008, 📈 운영 현황 탭에 3건 · 평균 응답 시간 · 비용이 집계되는 것까지 확인했다.
+- 헬스 체크: `https://bugwagi-ai-tutor.streamlit.app/~/+/_stcore/health` → `ok`
