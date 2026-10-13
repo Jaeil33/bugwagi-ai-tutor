@@ -116,4 +116,17 @@ gcloud run deploy bugwagi-ai-tutor --source . --region asia-northeast3 --memory 
 
 ### 업데이트
 
-`main` 브랜치에 push하면 Streamlit Cloud가 자동으로 반영한다. 패키지(`requirements.txt`)를 바꾸면 다시 설치하느라 몇 분 걸린다.
+1. `main` 브랜치에 push한다.
+2. Streamlit Cloud에서 **Manage app → ⋮ → Reboot app**. 코드 변경 감시(`fileWatcherType`)를 꺼 두었기 때문에 다시 시작해야 반영된다.
+   - 감시를 켜 두면 transformers의 모듈 수천 개를 훑으면서 `ModuleNotFoundError: torchvision` 로그를 수백만 자 쏟아냈다(첫 배포 로그에서 확인).
+   - 운영 중에는 코드가 바뀌지 않으므로 끄는 쪽이 로그도 깨끗하고 CPU도 아낀다.
+3. 패키지(`requirements.txt`)를 바꾸면 다시 설치하느라 몇 분 걸린다.
+
+### 배포하며 겪은 문제
+
+| 문제 | 원인 | 해결 |
+|---|---|---|
+| (배포 전 확인) 패키지 설치 실패 | `uv`가 `--extra-index-url`의 PyTorch 인덱스에서만 `requests`를 찾음 | `--find-links`로 torch만 PyTorch에서 받기 |
+| Secrets에 키를 넣었는데 오프라인 모드로 시작 | 앱 시작 시점에 `os.environ`에 키가 없었음 | 시작할 때 `st.secrets`를 환경변수로 직접 옮기고, 읽은 개수 · 키 존재 여부만 로그에 기록 |
+| 로그가 오류로 가득 참 | Streamlit 코드 변경 감시가 transformers 모듈을 전부 훑음 | `fileWatcherType = "none"` |
+| Secrets 입력 시 `.env`의 다음 줄까지 따옴표 안에 붙여 넣음 | TOML 문자열은 한 줄이어야 함 | 따옴표를 키 끝에 닫기. `.env`와 TOML은 형식이 다름(TOML은 값에 따옴표 필요) |

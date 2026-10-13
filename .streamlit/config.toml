@@ -4,6 +4,9 @@ base = "light"
 [server]
 headless = true
 maxUploadSize = 20  # PDF 업로드는 파일당 20MB까지
+# 코드 변경 감시 끔: 켜 두면 transformers의 모듈 수천 개를 훑으며 오류 로그를 쏟아낸다(배포 로그에서 확인).
+# 대신 코드를 바꾼 뒤에는 Streamlit Cloud의 Manage app → Reboot 으로 다시 시작한다.
+fileWatcherType = "none"
 
 [client]
 showErrorDetails = "none"  # 오류 상세(스택트레이스)는 브라우저에 보이지 않고 서버 로그에만 남김
