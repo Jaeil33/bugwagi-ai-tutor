@@ -24,6 +24,25 @@ import streamlit as st
 import ops
 from rag_module import MODELS, OFFLINE_DEFAULT, PROMPT_VERSIONS, SEARCH_MODES, USER_TYPES, RAGPipeline
 
+
+@st.cache_resource
+def load_secrets_to_env():
+    """Streamlit Cloud의 Secrets(최상위 값)를 환경변수로 옮긴다. 서버 프로세스당 한 번만 실행.
+    Streamlit Cloud에 처음 배포했을 때 Secrets를 넣었는데도 os.environ에 키가 없어서 직접 옮기게 했다.
+    로컬(.env) · 컨테이너(환경변수)에는 secrets.toml이 없으므로 아무것도 하지 않는다."""
+    try:
+        secrets = dict(st.secrets)
+    except Exception:  # secrets.toml 없음 또는 형식 오류
+        secrets = {}
+    for key, value in secrets.items():
+        if isinstance(value, (str, int, float, bool)) and not os.environ.get(key):
+            os.environ[key] = str(value)
+    # 값은 남기지 않고, 몇 개를 읽었는지와 키가 있는지만 기록
+    ops.log_event("config", secrets=len(secrets), api_key_set=bool(os.environ.get("ANTHROPIC_API_KEY")))
+
+
+load_secrets_to_env()
+
 DEFAULT_PDF = "data/RFP_교육.pdf"
 UPLOAD_DIR = Path(tempfile.gettempdir()) / "bugwagi_uploads"
 MAX_UPLOADS = 3

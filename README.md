@@ -3,7 +3,8 @@
 1주차에 작성한 제안서 「DX·AI 교수학습 및 수업 교구 활용을 위한 생성형 AI 솔루션 도입」(부산과학기술대학교)의
 시스템 구성을 LangChain 기반 RAG + Streamlit으로 구현하고(2주차), 실제 서비스처럼 운영할 수 있게 다듬어 클라우드에 배포했습니다(3주차).
 
-- **배포 주소:** _(배포 후 기입)_
+- **배포 주소:** https://bugwagi-ai-tutor.streamlit.app (Streamlit Community Cloud)
+- **코드 저장소:** https://github.com/Jaeil33/bugwagi-ai-tutor
 - 배포 · 운영 방법: [DEPLOY.md](DEPLOY.md) · 실험 결과: [실험결과.md](실험결과.md)
 
 ```
